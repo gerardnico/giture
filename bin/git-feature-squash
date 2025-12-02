@@ -75,11 +75,10 @@ echo::info "Reset from $DEFAULT_BRANCH"
 command::echo_eval "git reset --soft $DEFAULT_BRANCH"
 
 # Commit with edit
-# The git-prevent-out-of-sync-commit hooks would fail
+# --no-verify because the git-prevent-out-of-sync-commit hooks would fail
+# and the commits have already been through the hooks
 # https://pre-commit.com/#temporarily-disabling-hooks
-# The SKIP environment variable is a comma separated list of hook ids.
-export SKIP="git-prevent-out-of-sync-commit"
-command::echo_eval "git commit --edit -am \"$MESSAGE\""
+command::echo_eval "git commit --no-verify --edit -am \"$MESSAGE\""
 # we push first so that we are in sync with the remote branch
 # ie we don't need to pull change from the remote
 # git hooks may fail if the remote is not in sync with the local branch
