@@ -68,3 +68,13 @@ indent_size = unset
 # /**
 #  * Star is at once space
 indent_size = unset
+
+[*.java]
+# Due to catch (IllegalBlockSizeException
+#        InvalidKeyException e) {
+indent_size = unset
+# Block comment (single star on all lines!) should align to the code and not to the first column
+# By default, only javadoc comment (double star) do that
+ij_java_block_comment_at_first_column = false
+# if true, the comments characters (//) are set at the beginning
+ij_java_line_comment_at_first_column = false
