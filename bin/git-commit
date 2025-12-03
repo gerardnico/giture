@@ -50,7 +50,12 @@ if [[ "${1:-}" =~ -h|--help|help ]]; then
 fi
 
 # Nothing to commit but push
-if ! git::is_dirty_index; then
+# --others are untracked files
+# --deleted
+# --modified
+# --stage
+FILES_TO_COMMIT=$(git ls-files --others --deleted --stage --modified --exclude-standard | wc -l)
+if [ "$FILES_TO_COMMIT" == "0" ]; then
   echo::warn "Nothing to commit"
   if git::is_dirty_commit; then
     echo::warn "Dirty commit: pushing"
@@ -58,6 +63,8 @@ if ! git::is_dirty_index; then
   fi
   exit
 fi
+
+echo::info "Found $FILES_TO_COMMIT files to commit"
 
 # Args parsing
 COMMIT_MESSAGE=""
@@ -105,7 +112,6 @@ git diff --cached --name-only --diff-filter=d | while read -r MODIFIED_FILE; do
   fi
 done
 
-
 # Auto Pull
 # Most of the time, pull can be in auto-mode (ie stash, pull, pop)
 # Even if we check it at commit time, it's still handy to have it automatically
@@ -133,7 +139,7 @@ if [ "$CURRENT_BRANCH_UPSTREAM" != "" ]; then
   fi
 fi
 
-echo::info "Committing"
+echo::info "Committing $FILES_TO_COMMIT files"
 # We can't use echo::eval because the message may be on multiple lines
 # Note: multiline is possible with
 # * multiple -m: git commit -m "First line" -m "Second line" --edit
