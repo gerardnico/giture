@@ -9,3 +9,4 @@ out
 *.orig
 # aider files to ignore
 .aider*
+!.aiderignore

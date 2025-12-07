@@ -3,13 +3,13 @@
 # If you don't want to create a commit, uses git-backup
 # It will add the actual working files in the last commit
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
 # Bash lib library path detection
-if [ "${GITURE_BASH_LIB_PATH:-}" == "" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
-  # This is also a valid path for brew
-  GITURE_BASH_LIB_PATH="$SCRIPT_DIR/../lib"
+if [ "${BASHLIB_PATH:-}" == "" ]; then
+  BASHLIB_PATH="$SCRIPT_DIR/../lib"
 fi
-export PATH="$GITURE_BASH_LIB_PATH:$PATH"
+export PATH="$BASHLIB_PATH:$PATH"
 
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
 source "bashlib-error.sh"
@@ -50,16 +50,6 @@ if [[ "${1:-}" =~ -h|--help|help ]]; then
   exit 0
 fi
 
-# Nothing to commit but push
-if ! git::is_dirty_index; then
-  echo::warn "Nothing to commit"
-  if git::is_dirty_commit; then
-    echo::warn "Dirty commit: pushing"
-    git push
-  fi
-  exit
-fi
-
 # Args parsing
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
@@ -77,6 +67,39 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ ! -f .git ]; then
+
+  # Script dir is mandatory because we may call the next version
+  # if we don't add the path, we may call the actual version
+  SUBMODULE_ARGS=("$SCRIPT_DIR/git-commit")
+  if [ $MESSAGE_EDIT == true ]; then
+    SUBMODULE_ARGS+=(--edit)
+  fi
+  SUBMODULE_ARGS+=("'$COMMIT_MESSAGE'")
+  if ! git submodule foreach "${SUBMODULE_ARGS[*]}"; then
+    echo::err "Error when committing to a submodule"
+    exit 1
+  fi
+
+fi
+
+# Nothing to commit but push
+# --others --exclude-standard are untracked files not ignored
+# --deleted
+# --modified
+FILES_TO_COMMIT=$(git ls-files --others --deleted --modified --exclude-standard | wc -l)
+if [ "$FILES_TO_COMMIT" == "0" ]; then
+  echo::warn "Nothing to commit"
+  if git::is_dirty_commit; then
+    echo::warn "Dirty commit: pushing"
+    git push
+  fi
+  exit
+fi
+echo::info "Found $FILES_TO_COMMIT files to commit"
 # Commit Message
 if [ "$COMMIT_MESSAGE" = "" ]; then
   COMMIT_MESSAGE=$(git::get_auto_commit_message)
@@ -84,7 +107,7 @@ if [ "$COMMIT_MESSAGE" = "" ]; then
 fi
 
 # Add the files
-# (renormalize below does not add any file into the index)
+# (re-normalize below does not add any file into the index)
 git add -A
 
 # `--renormalize` to correct the EOL in the working tree
@@ -106,7 +129,6 @@ git diff --cached --name-only --diff-filter=d | while read -r MODIFIED_FILE; do
   fi
 done
 
-
 # Auto Pull
 # Most of the time, pull can be in auto-mode (ie stash, pull, pop)
 # Even if we check it at commit time, it's still handy to have it automatically
@@ -127,14 +149,14 @@ if [ "$CURRENT_BRANCH_UPSTREAM" != "" ]; then
   #hint: See the 'Note about fast-forwards' in 'git push --help' for details.
   git fetch
   # rev-list provides the ability to build and traverse commit ancestry graphs.
-  UPSTREAM_COMMIT_TO_MERGE=$(git rev-list HEAD...'@{u}' --count)
+  UPSTREAM_COMMIT_TO_MERGE=$(git::get_commits_behind_of_upstream)
   if [ "$UPSTREAM_COMMIT_TO_MERGE" != 0 ]; then
     echo::warn "$UPSTREAM_COMMIT_TO_MERGE Upstream Commits has not been integrated"
     git-pull
   fi
 fi
 
-echo::info "Committing"
+echo::info "Committing $FILES_TO_COMMIT files"
 # We can't use echo::eval because the message may be on multiple lines
 # Note: multiline is possible with
 # * multiple -m: git commit -m "First line" -m "Second line" --edit
