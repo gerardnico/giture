@@ -110,6 +110,14 @@ fi
 if [ ! -f .git ]; then
   echo "Entering main repo"
 fi
+
+# Nothing to commit feedback if any
+FILES_TO_COMMIT=$(git status --short | wc -l)
+if [ "$FILES_TO_COMMIT" == "0" ]; then
+  echo::warn "Nothing to commit"
+fi
+
+# This command do not output anything if there is nothing (even not a end of line)
 git status --short
 
 # Spacing between module and repo
