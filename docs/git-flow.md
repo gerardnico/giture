@@ -106,11 +106,12 @@ gtd
 
 Common rules applied by all commands
 
-| No need to     | Why?                                                                                                                                                                     |
-|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| pass arguments | We recreate the official git commands without arguments by default                                                                                                       |
-| sync           | Local and remote repo are synced immediately <br/> The commands suppose that you are working alone on a `feature` branch so that they can delete a remote commit safely. |
-| add files      | All files found in the index go to the next commit (ie not staged files are automatically staged)                                                                        |
+| No need to                 | Why?                                                                                                                                                                     |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| pass arguments             | We recreate the official git commands without arguments by default                                                                                                       |
+| sync                       | Local and remote repo are synced immediately <br/> The commands suppose that you are working alone on a `feature` branch so that they can delete a remote commit safely. |
+| add files                  | All files found in the index go to the next commit (ie not staged files are automatically staged)                                                                        |
+| execute them on submodules | If your repository has sub-modules, the commands are also performed on them. See the [submodules page](submodule.md) for actual support by command                       |
 
 The `2 letters alias` column in the below list is a proposed alias that you can create in your `.bashrc`. Example:
 

@@ -8,7 +8,7 @@
 
 ## HOW
 
-It performs at once a `git`:
+It performs at once a `git` for the main repo and all its [submodule](../submodule.md):
 
 * pull with [git-pull](git-pull.md) if commits have not been integrated from remote. See [why](#why-we-check-for-remote-commit)
 * `add` all modified files

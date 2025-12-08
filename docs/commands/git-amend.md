@@ -5,14 +5,18 @@
 ## DESCRIPTION
 
 This commands allows you to recreate the last commit
+
 * with the actual modified and added files.
 * with a new message
 * or both
 
 It's a [git commit amend](https://git-scm.com/book/id/v2/Git-Tools-Rewriting-History#_git_amend)
-that always work (even if the commit was pushed to the remote)
+that:
 
-## How?
+* always work (even if the commit was pushed to the remote)
+* execute also on the [submodules](../submodule.md)
+
+## HOW?
 
 * Soft reset of the last commit. ie:
   * Delete the commit (locally and remotely)
