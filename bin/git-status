@@ -21,7 +21,7 @@ source "bashlib-doc.sh"
 function synopsis() {
 
   cat << EOF
-Git status for human
+Short Git status that also works on submodule
 \`\`\`bash
 $(basename "$0")
 \`\`\`
