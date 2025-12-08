@@ -4,7 +4,7 @@
 
 ## DESCRIPTION
 
-This command will output a short status for your local working directory and all its submodules
+This command will output a short status for your local working directory and all its [submodules](../submodule.md)
 
 ## SYNOPSIS
 
