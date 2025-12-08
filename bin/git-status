@@ -3,18 +3,19 @@
 
 set -Eeuo pipefail
 
-# Bash lib library path detection
-if [ "${GITURE_BASH_LIB_PATH:-}" == "" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
-  # This is also a valid path for brew
-  GITURE_BASH_LIB_PATH="$SCRIPT_DIR/../lib"
-fi
-export PATH="$GITURE_BASH_LIB_PATH:$PATH"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
 
-# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+# Bash lib library path detection
+if [ "${BASHLIB_PATH:-}" == "" ]; then
+  # This is also a valid path for brew
+  BASHLIB_PATH="$SCRIPT_DIR/../lib"
+fi
+export PATH="$BASHLIB_PATH:$PATH"
+
+# shellcheck source=../bash-lib/lib/bashlib-error.sh
 source "bashlib-error.sh"
 error::set_trap
-# shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
+# shellcheck source=../bash-lib/lib/bashlib-doc.sh
 source "bashlib-doc.sh"
 
 function synopsis() {
@@ -40,6 +41,8 @@ if [[ "${1:-}" =~ -h|--help|help ]]; then
   exit 0
 fi
 
+# git ls-files wrapper
+# difficult to get the status
 function git_working_status() {
   modified=$(git ls-files -m)
   if [[ -n $modified ]]; then
@@ -50,7 +53,7 @@ function git_working_status() {
     echo ""
     echo -e "Deleted:\n$deleted"
   fi
-  untracked=$(git ls-files -o)
+  untracked=$(git ls-files -o --exclude-standard)
   if [[ -n $untracked ]]; then
     echo ""
     echo -e "Not tracked (may be ignored):\n$untracked"
@@ -60,6 +63,7 @@ function git_working_status() {
   fi
 }
 
+# Porcelain script that shows how to parse it
 function git_status() {
   # for scripting: git status --porcelain
   # porcelain means give the output in an easy-to-parse format for scripts
@@ -75,19 +79,38 @@ function git_status() {
   # for an unstaged file: `status space path`
   # for a staged file: `status space space path`
   echo "$vPorcelain" | while read -r fileStatusLine; do
-    # fileStatus=${fileStatusLine:0:1} # not yet used
+    fileStatus=${fileStatusLine:0:1} # not yet used
     fileStatusStaged=${fileStatusLine:1:2}
+    filePath=${fileStatusLine:2}
     if [ "${fileStatusStaged}" == '  ' ]; then
-      inNextCommit=' (staged)'
+      stagedOrNot=' (staged)'
       # filePath=${fileStatusLine:3} # not yet used
     else
-      inNextCommit=' (unstaged)'
+      stagedOrNot=' (unstaged)'
       # filePath=${fileStatusLine:2} # not yet used
     fi
-    echo "$fileStatusLine$inNextCommit"
+    echo "$fileStatus $filePath ${stagedOrNot}"
   done
 
 }
 
-git_working_status
-git_status
+# Function below are deprecated for now, we use the standard default format
+# git_working_status
+# git_status
+
+# First submodule status
+# Not in a submodule (.git is a file)
+if [ ! -f .git ]; then
+  # script dir is mandatory because we may call the next version
+  # and git-amend in the path is generally the actual version
+  git submodule foreach "$SCRIPT_DIR/git-status"
+fi
+
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo "Entering main repo"
+fi
+git status --short
+
+# Spacing between module and repo
+echo ""
