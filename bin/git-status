@@ -111,6 +111,9 @@ if [ ! -f .git ]; then
   echo "Entering main repo"
 fi
 
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+echo "Branch: $BRANCH_NAME"
+
 # Nothing to commit feedback if any
 FILES_TO_COMMIT=$(git status --short | wc -l)
 if [ "$FILES_TO_COMMIT" == "0" ]; then
