@@ -8,6 +8,4 @@ This command will output a short status for your local working directory and all
 
 ## SYNOPSIS
 
-```bash
 ${SYNOPSIS}
-```

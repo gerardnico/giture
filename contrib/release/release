@@ -79,4 +79,5 @@ jreleaser full-release
 echo "Version release of $next_version done"
 
 # Website
+# To deploy on CI, a npm install is needed
 (cd "$PROJECT_ROOT/website"; npx docusaurus deploy);
