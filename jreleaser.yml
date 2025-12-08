@@ -114,5 +114,6 @@ distributions:
         org.opencontainers.image.title: "{{projectName}}"
       cmd: "git"
       imageNames:
-        - "ghcr.io/combostrap/{{dockerSpecName}}:{{tagName}}"
-        - "ghcr.io/combostrap/{{dockerSpecName}}:latest"
+        # don't use a separator after dockerSpecName as the value contains the :
+        - "ghcr.io/combostrap/{{dockerSpecName}}{{tagName}}"
+        - "ghcr.io/combostrap/{{dockerSpecName}}latest"

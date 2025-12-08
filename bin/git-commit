@@ -87,10 +87,7 @@ if [ ! -f .git ]; then
 fi
 
 # Nothing to commit but push
-# --others --exclude-standard are untracked files not ignored
-# --deleted
-# --modified
-FILES_TO_COMMIT=$(git ls-files --others --deleted --modified --exclude-standard | wc -l)
+FILES_TO_COMMIT=$(git status --short | wc -l)
 if [ "$FILES_TO_COMMIT" == "0" ]; then
   echo::warn "Nothing to commit"
   if git::is_dirty_commit; then
@@ -99,7 +96,7 @@ if [ "$FILES_TO_COMMIT" == "0" ]; then
   fi
   exit
 fi
-echo::info "Found $FILES_TO_COMMIT files to commit"
+echo::info "Found $FILES_TO_COMMIT objects to commit"
 # Commit Message
 if [ "$COMMIT_MESSAGE" = "" ]; then
   COMMIT_MESSAGE=$(git::get_auto_commit_message)
