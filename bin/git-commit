@@ -33,7 +33,8 @@ function synopsis() {
 $(basename "$0") [--edit|-e] [Optional Commit Message]
 \`\`\`
 * if the commit message is not given, it will be generated with the files in the commit.
-* \`--edit\` or \`-e\` will let you edit the message
+* \`--edit\` or \`-e\`          : edit the message in the editor
+* \`--no-recurse\` or \`-nr\`   : don't commit in the submodule
 EOF
 
 }
@@ -53,10 +54,14 @@ fi
 # Args parsing
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
+RECURSE=true
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -e | --edit)
       MESSAGE_EDIT=true
+      ;;
+    -nr | --no-recurse)
+      RECURSE=false
       ;;
     *)
       COMMIT_MESSAGE=${1}
@@ -70,16 +75,11 @@ done
 # First submodules
 # If not in a submodule (in a submodule .git is a file)
 # Otherwise the commit is only for the submodule
-if [ ! -f .git ]; then
+if [ $RECURSE == true ] && [ ! -f .git ]; then
 
-  # Script dir is mandatory because we may call the next version
-  # if we don't add the path, we may call the actual version
-  SUBMODULE_ARGS=("$SCRIPT_DIR/git-commit")
-  if [ $MESSAGE_EDIT == true ]; then
-    SUBMODULE_ARGS+=(--edit)
-  fi
-  SUBMODULE_ARGS+=("'$COMMIT_MESSAGE'")
-  if ! git submodule foreach "${SUBMODULE_ARGS[*]}"; then
+  # script dir is mandatory because we may call the next version
+  # and git-commit in the PATH env var is generally the actual version
+  if ! git submodule foreach "$SCRIPT_DIR/git-commit $*"; then
     echo::err "Error when committing to a submodule"
     exit 1
   fi

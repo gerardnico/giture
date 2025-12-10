@@ -26,9 +26,12 @@ function synopsis() {
   cat << EOF
 Recreate the last commit with the actual modified and added files.
 \`\`\`bash
-$(basename "$0")  [Commit Message]
+$(basename "$0") [-e|--edit] [-nr|--no-recurse] [Commit Message]
 \`\`\`
 If the commit message is not given, it will take the message of the last commit.
+
+* \`--edit\` or \`-e\`          : edit the message in the editor
+* \`--no-recurse\` or \`-nr\`   : don't amend in the submodule
 EOF
 }
 
@@ -44,21 +47,17 @@ if [[ "${1:-}" =~ -h|--help|help ]]; then
   exit 0
 fi
 
-# First submodule
-# Not in a submodule (.git is a file)
-if [ ! -f .git ]; then
-  # script dir is mandatory because we may call the next version
-  # and git-amend in the path is generally the actual version
-  git submodule foreach "$SCRIPT_DIR/git-amend"
-fi
-
 # Args parsing
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
+RECURSE=true
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -e | --edit)
       MESSAGE_EDIT=true
+      ;;
+    -nr | --no-recurse)
+      RECURSE=false
       ;;
     *)
       COMMIT_MESSAGE=${1}
@@ -68,6 +67,14 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# First submodule
+# In a submodule .git is a file
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+  # script dir is mandatory because we may call the next version
+  # and git-amend in the PATH env var is generally the actual version
+  git submodule foreach "$SCRIPT_DIR/git-amend $*"
+fi
 
 if ! git::is_dirty_index && [ "$COMMIT_MESSAGE" == "" ] && [ $MESSAGE_EDIT == false ]; then
   echo::warn "Nothing to do: no files to amend, no message to edit, no new message, exiting"
