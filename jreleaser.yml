@@ -90,7 +90,18 @@ distributions:
       repository:
         # multi product one repo, we add the project
         tagName: '{{projectName}}-{{tagName}}'
-      # dependencies are in the template because the jdk is added automatically, and we don't want that
+      # Dependency mostly due to the hosting backup command (see its documentation)
+      # No schema validation because it's setup to an array, but it's a map asked
+      # noinspection YAMLSchemaValidation
+      dependencies:
+        coreutils: 'null'
+        git: 'null'
+        openssh: 'null'
+        curl: 'null'
+      extraProperties:
+        # Don't add java as dependency
+        # https://jreleaser.org/guide/latest/reference/packagers/homebrew.html#_jdk_dependency
+        skipJava: "true"
     # Run it with
     # Create the assembly
     #    jreleaser assemble --debug --assembler=archive

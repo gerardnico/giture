@@ -17,12 +17,11 @@ class {{brewFormulaName}} < Formula
     {{/brewLivecheck}}
   end
   {{/brewHasLivecheck}}
-  # Mostly due to the hosting backup command
-  # see its documentation
-  depends_on "coreutils"
-  depends_on "git"
-  depends_on "openssh"
-  depends_on "curl"
+
+
+  {{#brewDependencies}}
+  depends_on {{.}}
+  {{/brewDependencies}}
 
   def install
 

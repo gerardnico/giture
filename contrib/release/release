@@ -78,6 +78,9 @@ fi
 jreleaser full-release
 echo "Version release of $next_version done"
 
+# to resolve ! [rejected] v0.x.x -> v0.x.x  (would clobber existing tag)
+git fetch --tags --force
+
 # Website
 # To deploy on CI, a npm install is needed
 (cd "$PROJECT_ROOT/website"; npx docusaurus deploy);

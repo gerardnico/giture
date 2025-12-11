@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Giture Installation'
 ---
-# Installation
+# Installation / Upgrade
 
 ## Docker
 
@@ -18,6 +18,13 @@ docker run \
 
 Mac / Linux / Windows WSL with HomeBrew
 
+* Installation
 ```bash
 brew install gerardnico/tap/giture
+```
+
+* Upgrade
+```bash
+brew update
+brew upgrade giture
 ```
