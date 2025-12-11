@@ -104,6 +104,8 @@ if [ ! -f .git ]; then
   # script dir is mandatory because we may call the next version
   # and git-amend in the path is generally the actual version
   git submodule foreach "$SCRIPT_DIR/git-status"
+  # Note there is also
+  # git submodule status
 fi
 
 # Status of the actual repo

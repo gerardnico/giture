@@ -55,12 +55,12 @@ fi
 echo::info "Check if branch $BRANCH_NAME is dirty"
 command::echo_eval "git checkout $BRANCH_NAME"
 if git::is_dirty_index; then
-  echo::err "The branch is dirty, commit, stash or rollback your changes"
+  echo::err "The branch $BRANCH_NAME is dirty. Commit, stash or rollback your changes"
   exit 1
 fi
 
 # Message before the reset
-COMMIT_MESSAGE=${1:-"chore: squash feature branch $BRANCH_NAME"}
+COMMIT_MESSAGE=${1:-"feat: squash feature branch $BRANCH_NAME"}
 echo::info "Commit"
 BODY=$(git log --pretty=format:%s%n%b "$DEFAULT_BRANCH".."$BRANCH_NAME")
 SCISSOR_LINE="# ------------------------ >8 ------------------------"
@@ -75,14 +75,12 @@ HereDoc
 
 # Reset
 echo::info "Reset from $DEFAULT_BRANCH"
-command::echo_eval "git reset --soft $DEFAULT_BRANCH"
+command::echo_eval "git reset --no-recurse-submodules --soft $DEFAULT_BRANCH"
 
 # Commit with edit
 # The git-prevent-out-of-sync-commit hooks would fail
-# https://pre-commit.com/#temporarily-disabling-hooks
-# The SKIP environment variable is a comma separated list of hook ids.
-export SKIP="git-prevent-out-of-sync-commit"
-command::echo_eval "git commit --edit -am \"$MESSAGE\""
+# We disable git hooks
+command::echo_eval "git commit --no-verify --edit -am \"$MESSAGE\""
 # we push first so that we are in sync with the remote branch
 # ie we don't need to pull change from the remote
 # git hooks may fail if the remote is not in sync with the local branch

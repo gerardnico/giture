@@ -28,3 +28,7 @@ This line will make git ignore everything below.
 ## SYNOPSIS
 
 ${SYNOPSIS}
+
+## SUBMODULE SUPPORT
+
+We don't squash on [submodule](../submodule.md)

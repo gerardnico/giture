@@ -79,7 +79,7 @@ fi
 
 # The --squash option takes all the commits and condenses them into one WIP index on main
 echo::info "Merge squash the $BRANCH_NAME"
-command::echo_eval "git merge --squash $BRANCH_NAME"
+command::echo_eval "git merge --no-recurse-submodules --squash $BRANCH_NAME"
 if ! git-prepare; then
   echo::warn "Commit hooks have failed"
   echo::warn "Check the error and commit against $DEFAULT_BRANCH"

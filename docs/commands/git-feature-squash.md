@@ -5,7 +5,6 @@
 
 This command will squash all feature branch commits to 1 commit.
 
-
 ## SYNOPSIS
 
 ${SYNOPSIS}
@@ -17,3 +16,7 @@ The message shown in the editor will be a concatenation of all subject and body 
 
 We had a scissor line at the end of the commit message.
 This line will make git ignore everything below.
+
+## SUBMODULE SUPPORT
+
+We don't squash on [submodule](../submodule.md).
