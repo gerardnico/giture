@@ -20,7 +20,10 @@ It's created via concatenation if all subjects and body of commits message
 of the working branch.
 
 At the end, the editor is open to give you the possibility to change it.
-(tip: `ZZ` to save and close VIM)
+(tip: `ZZ` to save and close VIM).
+
+We had a scissor line at the end of the commit message.
+This line will make git ignore everything below.
 
 ## SYNOPSIS
 

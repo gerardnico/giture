@@ -63,11 +63,13 @@ fi
 COMMIT_MESSAGE=${1:-"chore: squash feature branch $BRANCH_NAME"}
 echo::info "Commit"
 BODY=$(git log --pretty=format:%s%n%b "$DEFAULT_BRANCH".."$BRANCH_NAME")
+SCISSOR_LINE="# ------------------------ >8 ------------------------"
 MESSAGE=$(
   cat <<- HereDoc
 $COMMIT_MESSAGE
 
 $BODY
+$SCISSOR_LINE
 HereDoc
 )
 

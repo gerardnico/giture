@@ -87,6 +87,7 @@ if ! git-prepare; then
 fi
 COMMIT_MESSAGE=${1:-"feat: merge feature branch $BRANCH_NAME"}
 echo::info "Commit"
+SCISSOR_LINE="# ------------------------ >8 ------------------------"
 # All subject and body, we delete empty line because if the body (b) is empty we get an empty line
 BODY=$(git log --pretty=format:%s%n%b "$DEFAULT_BRANCH".."$BRANCH_NAME" | sed 's/[^:]*: /  - /' | sed '/^[[:space:]]*$/d')
 MESSAGE=$(
@@ -94,6 +95,7 @@ MESSAGE=$(
 $COMMIT_MESSAGE
 
 $BODY
+$SCISSOR_LINE
 HereDoc
 )
 # Commit with edit message
