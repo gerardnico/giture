@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # for docs, see md file
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
 # Bash lib library path detection
 if [ "${BASHLIB_PATH:-}" == "" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
   # This is also a valid path for brew
   BASHLIB_PATH="$SCRIPT_DIR/../lib"
 fi
@@ -24,15 +25,14 @@ source "bashlib-path.sh"
 # shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
 source "bashlib-doc.sh"
 
+function synopsis() {
 
-function synopsis(){
-
-  cat <<EOF
+  cat << EOF
 List, switch to or create a branch
 \`\`\`bash
 $(basename "$0")  [branch_name]
 \`\`\`
-* without branch name, the local and remotes branches are list
+* without branch name, the local and remotes branches are listed
 * with a branch name
   * the branch is created if it does not exist
   * the work is stashed
@@ -54,26 +54,64 @@ if [[ "${1:-}" =~ -h|--help|help ]]; then
   exit 0
 fi
 
-BRANCH_NAME=${1:-}
+
+RECURSE=false
+BRANCH_NAME=""
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r | --recurse)
+      RECURSE=true
+      ;;
+    *)
+      BRANCH_NAME=${1}
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
 if [ "$BRANCH_NAME" = "" ]; then
-  # list remote and local branch
+  echo "list remote and local branch"
   git branch --all --column=never
   exit 0
 fi
 
-# Nothing to commit but push
-DIRTY_INDEX="no"
-if git::is_dirty_index ; then
-  DIRTY_INDEX="yes"
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
+  # script dir is mandatory because we may call the next version
+  # and git-commit in the PATH env var is generally the actual version
+  if ! git submodule foreach "$SCRIPT_DIR/git-branch ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when committing to a submodule"
+    exit 1
+  fi
+
 fi
-if [ $DIRTY_INDEX == "yes" ]; then
+
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo ""
+  echo "Entering main repo"
+fi
+
+
+# Nothing to commit but push
+DIRTY_INDEX=false
+if git::is_dirty_index; then
+  DIRTY_INDEX=true
+fi
+if [ $DIRTY_INDEX == true ]; then
   echo::info "Index is dirty, saving in stash"
   git stash
 fi
 
 if ! git::branch_exists "$BRANCH_NAME"; then
-    echo::info "Creating branch $BRANCH_NAME"
-    git branch "$BRANCH_NAME"
+  echo::info "Creating branch $BRANCH_NAME"
+  git branch "$BRANCH_NAME"
 fi
 
 echo::info "Switching to the branch $BRANCH_NAME"

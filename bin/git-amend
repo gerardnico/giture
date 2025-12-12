@@ -51,6 +51,7 @@ fi
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
 RECURSE=true
+ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -e | --edit)
@@ -73,7 +74,7 @@ done
 if [ $RECURSE == true ] && [ ! -f .git ]; then
   # script dir is mandatory because we may call the next version
   # and git-amend in the PATH env var is generally the actual version
-  git submodule foreach "$SCRIPT_DIR/git-amend $*"
+  git submodule foreach "$SCRIPT_DIR/git-amend ${ORIGINAL_ARGS[*]}"
 fi
 
 if ! git::is_dirty_index && [ "$COMMIT_MESSAGE" == "" ] && [ $MESSAGE_EDIT == false ]; then

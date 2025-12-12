@@ -55,6 +55,7 @@ fi
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
 RECURSE=true
+ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -e | --edit)
@@ -79,7 +80,7 @@ if [ $RECURSE == true ] && [ ! -f .git ]; then
 
   # script dir is mandatory because we may call the next version
   # and git-commit in the PATH env var is generally the actual version
-  if ! git submodule foreach "$SCRIPT_DIR/git-commit $*"; then
+  if ! git submodule foreach "$SCRIPT_DIR/git-commit ${ORIGINAL_ARGS[*]}"; then
     echo::err "Error when committing to a submodule"
     exit 1
   fi

@@ -24,5 +24,8 @@ These operations will not recurse
 
 * [git-feature-merge](commands/git-feature-merge.md)
 * [git-feature-squash](commands/git-feature-squash.md)
+* [git-branch](commands/git-branch.md)
 
 You need to do it first on each submodule, then on the main repo.
+
+You can recurse with the recurse flag: `-r` or `--recurse`

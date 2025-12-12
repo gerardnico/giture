@@ -21,3 +21,7 @@ A branch checkout that will always work
 ## SYNOPSIS
 
 ${SYNOPSIS}
+
+## SUBMODULE
+
+By default, this command will not recurse over [submodule](../submodule.md)
