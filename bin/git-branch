@@ -72,12 +72,6 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if [ "$BRANCH_NAME" = "" ]; then
-  echo "list remote and local branch"
-  git branch --all --column=never
-  exit 0
-fi
-
 # First submodules
 # If not in a submodule (in a submodule .git is a file)
 # Otherwise the commit is only for the submodule
@@ -98,6 +92,11 @@ if [ ! -f .git ]; then
   echo "Entering main repo"
 fi
 
+if [ "$BRANCH_NAME" = "" ]; then
+  echo "list remote and local branch"
+  git branch --all --column=never
+  exit 0
+fi
 
 # Nothing to commit but push
 DIRTY_INDEX=false
