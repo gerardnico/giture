@@ -132,9 +132,9 @@ alias ga='git-amend'
 | `gfs`           | [git-feature-squash](commands/git-feature-squash.md) | Squash all commits of a feature branch                                            |
 | `gl`            | [git-log](commands/git-log.md)                       | Shows the last commit                                                             |
 | `gll`           | [git-log-all](commands/git-log-all.md)               | Shows all commits                                                                 |
+| `go`            | [git-origin](commands/git-origin.md)                 | Shows origin remote status information (commit sync, GitHub actions runner)       |
 |                 | [git-pull](commands/git-pull.md)                     | Stash, Pull, un-stash in one command                                              |
 | `gp`            | [git-prepare](commands/git-prepare.md)               | Check the files against git-hooks with pre-commit                                 |
-|                 | [git-remote](commands/git-remote.md)                 | Shows remote status information (commit sync, GitHub actions runner)              |
 | `gr`            | [git-reset](commands/git-reset.md)                   | Restart with a clean state (as a `git clone`)                                     |
 | `gs`            | [git-status](commands/git-status.md)                 | Shows the working area status                                                     |
 | `gtd`           | [git-tag-delete](commands/git-tag-delete.md)         | Delete a tag and its GitHub release if any                                        |
