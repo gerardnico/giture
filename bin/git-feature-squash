@@ -27,15 +27,18 @@ function synopsis() {
   cat << EOF
 Squash all commits of a branch into one
 \`\`\`bash
-$(basename "$0") [commit message]
+$(basename "$0") [options] [commit message]
 \`\`\`
+
+  Options:
+    * \`--recurse\` or \`-r\`    : recurse and amend in the submodules
 EOF
 
 }
 
-RECURSE=false
 BRANCH_NAME=$(git::get_current_branch) # for the default commit message
 COMMIT_MESSAGE="feat: squash feature branch $BRANCH_NAME"
+RECURSE=false
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -68,8 +71,8 @@ if [ $RECURSE == true ] && [ ! -f .git ]; then
 
   # script dir is mandatory because we may call the next version
   # and git-commit in the PATH env var is generally the actual version
-  if ! git submodule foreach "$SCRIPT_DIR/git-feature-squash ${ORIGINAL_ARGS[*]}"; then
-    echo::err "Error when squashing to a submodule"
+  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when executing $(basename "$0") to a submodule"
     exit 1
   fi
 
@@ -89,7 +92,9 @@ fi
 
 echo::info "Check if branch $BRANCH_NAME is dirty"
 command::echo_eval "git checkout $BRANCH_NAME"
-if git::is_dirty_index; then
+# Dirty check (ignoring-submodules commit hash that may come from recursing)
+# git-diff-index - Compare a tree to the working tree or index
+if ! git diff-index --ignore-submodules --quiet HEAD --; then
   echo::err "The branch $BRANCH_NAME is dirty. Commit, stash or rollback your changes"
   exit 1
 fi
@@ -120,3 +125,8 @@ command::echo_eval "git commit --no-verify --edit -am \"$MESSAGE\""
 # git hooks may fail if the remote is not in sync with the local branch
 command::echo_eval "git push --force-with-lease"
 echo::success "Done"
+
+if [ $RECURSE == true ]; then
+  # Spacing
+  echo ""
+fi

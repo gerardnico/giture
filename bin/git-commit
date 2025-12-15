@@ -169,7 +169,10 @@ fi
 git "${COMMIT_ARGS[@]}"
 
 # Spacing in case of submodule execution
-echo ""
+if [ $RECURSE == true ]; then
+  # Spacing
+  echo ""
+fi
 
 if [ "$CURRENT_BRANCH_UPSTREAM" != "" ]; then
   git push

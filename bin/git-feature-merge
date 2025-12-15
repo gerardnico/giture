@@ -3,9 +3,10 @@
 
 set -Eeuo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
 # Bash lib library path detection
 if [ "${BASHLIB_PATH:-}" == "" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
   # This is also a valid path for brew
   BASHLIB_PATH="$SCRIPT_DIR/../lib"
 fi
@@ -25,26 +26,65 @@ function synopsis() {
 
   cat << EOF
 Merge a feature branch
+
 \`\`\`bash
-$(basename "$0") commit message
+$(basename "$0") [options] [commit message]
 \`\`\`
+
+  Options:
+    * \`--recurse\` or \`-r\`    : recurse in the submodules
+
 EOF
 
 }
 
-# Doc Synopsis
-if [ "${1:-}" = "synopsis" ]; then
-  synopsis
-  exit 0
-fi
-
-# Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
-  doc::help synopsis
-  exit 0
-fi
-
 BRANCH_NAME=$(git::get_current_branch)
+COMMIT_MESSAGE=${1:-"feat: merge feature branch $BRANCH_NAME"}
+RECURSE=false
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -r | --recurse)
+      RECURSE=true
+      ;;
+    *)
+      COMMIT_MESSAGE=${1}
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
+  # script dir is mandatory because we may call the next version
+  # and git-commit in the PATH env var is generally the actual version
+  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when executing $(basename "$0") to a submodule"
+    exit 1
+  fi
+
+fi
+
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo "Entering main repo"
+fi
+
 DEFAULT_BRANCH=$(git::get_default_branch)
 if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
   echo::error "It's not a feature branch, it's the default branch ($DEFAULT_BRANCH)"
@@ -74,32 +114,15 @@ if [ "$COMMIT_COUNT" == "1" ]; then
   echo::success "Done"
   echo::tip "Delete feature with:"
   echo::tip "   git-feature-delete $BRANCH_NAME"
+
+  if [ $RECURSE == true ]; then
+    # Spacing
+    echo ""
+  fi
+
   exit
 fi
 
-# The --squash option takes all the commits and condenses them into one WIP index on main
-echo::info "Merge squash the $BRANCH_NAME"
-command::echo_eval "git merge --no-recurse-submodules --squash $BRANCH_NAME"
-if ! git-prepare; then
-  echo::warn "Commit hooks have failed"
-  echo::warn "Check the error and commit against $DEFAULT_BRANCH"
-  exit 1
-fi
-COMMIT_MESSAGE=${1:-"feat: merge feature branch $BRANCH_NAME"}
-echo::info "Commit"
-SCISSOR_LINE="# ------------------------ >8 ------------------------"
-# All subject and body, we delete empty line because if the body (b) is empty we get an empty line
-BODY=$(git log --pretty=format:%s%n%b "$DEFAULT_BRANCH".."$BRANCH_NAME" | sed 's/[^:]*: /  - /' | sed '/^[[:space:]]*$/d')
-MESSAGE=$(
-  cat <<- HereDoc
-$COMMIT_MESSAGE
-
-$BODY
-$SCISSOR_LINE
-HereDoc
-)
-# Commit with edit message
-git-commit --edit "$MESSAGE"
-echo::success "Done"
-echo::tip "Delete branch with:"
-echo::tip "   git-branch-delete $BRANCH_NAME"
+echo::err "More than 1 commit to integrate: $COMMIT_COUNT"
+echo::err "We don't support yet merging branch that have not been squashed to 1 commit with git-feature-squash"
+exit 1
