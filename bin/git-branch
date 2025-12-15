@@ -123,7 +123,7 @@ fi
 echo::info "Switching to the branch $BRANCH_NAME"
 git checkout "$BRANCH_NAME"
 
-if [ $DIRTY_INDEX == "yes" ]; then
+if [ $DIRTY_INDEX == true ]; then
   echo::info "Index was dirty, popping the stash"
   git stash pop
 fi
