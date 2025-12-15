@@ -10,7 +10,7 @@ This repository contains commands that will help you:
 
 * [in your git flow with minimal command (double letters without any arguments)](https://tools.gerardnico.com/giture/docs/git-flow)
 * [execute a command against multiple repositories](https://tools.gerardnico.com/giture/docs/git-exec)
-* [backup you GitHub repositories](https://tools.gerardnico.com/giture/docs/git-backup)
+* [backup your GitHub repositories](https://tools.gerardnico.com/giture/docs/git-backup)
 
 ## Installation
 
