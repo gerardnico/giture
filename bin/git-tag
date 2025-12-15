@@ -92,7 +92,6 @@ fi
 
 # Status of the actual repo
 if [ ! -f .git ]; then
-  echo ""
   echo "Entering main repo"
 fi
 
@@ -101,6 +100,11 @@ if [ "$TAG_NAME" == "" ]; then
   # Shows the tags and the hash tag next to each other
   # shellcheck disable=SC2016
   git tag -l | xargs -I {} sh -c 'echo "{} $(git rev-parse --short {})"'
+  # Spacing between module and repo
+  if [ $RECURSE == true ]; then
+    # Spacing
+    echo ""
+  fi
   exit
 
 fi
@@ -127,8 +131,14 @@ if [ $LOCAL_TAG_FOUND == true ] || [ $REMOTE_TAG_FOUND == true ]; then
   git-tag-delete "$TAG_NAME"
 fi
 
-echo "Creating Tag $1"
-git tag "$1"
-echo "Pushing Tag $1"
-git push origin tag "$1"
+echo "Creating Tag $TAG_NAME"
+git tag "$TAG_NAME"
+echo "Pushing Tag $TAG_NAME"
+git push origin tag "$TAG_NAME"
 echo "Tagging done"
+
+# Spacing between module and repo
+if [ $RECURSE == true ]; then
+  # Spacing
+  echo ""
+fi
