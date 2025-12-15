@@ -29,17 +29,26 @@ EOF
 
 }
 
-# Doc Synopsis
-if [ "${1:-}" = "synopsis" ]; then
-  synopsis
-  exit 0
-fi
-
-# Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
-  doc::help synopsis
-  exit 0
-fi
+RECURSE=true
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -nr | --no-recurse)
+      RECURSE=false
+      ;;
+  esac
+  shift
+done
 
 # git ls-files wrapper
 # difficult to get the status
@@ -98,14 +107,18 @@ function git_status() {
 # git_working_status
 # git_status
 
-# First submodule status
-# Not in a submodule (.git is a file)
-if [ ! -f .git ]; then
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
   # script dir is mandatory because we may call the next version
-  # and git-amend in the path is generally the actual version
-  git submodule foreach "$SCRIPT_DIR/git-status"
-  # Note there is also
-  # git submodule status
+  # and git-commit in the PATH env var is generally the actual version
+  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when executing $(basename "$0") to a submodule"
+    exit 1
+  fi
+
 fi
 
 # Status of the actual repo
@@ -126,4 +139,7 @@ fi
 git status --short
 
 # Spacing between module and repo
-echo ""
+if [ $RECURSE == true ]; then
+  # Spacing
+  echo ""
+fi
