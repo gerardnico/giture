@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # for doc, see md file
 
 set -Eeuo pipefail

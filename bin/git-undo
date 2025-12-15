@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # see markdown file
 
 set -Eeuo pipefail

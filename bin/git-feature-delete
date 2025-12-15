@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Delete a feature branch, see md file for documentation
 
 set -Eeuo pipefail

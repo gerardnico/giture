@@ -19,4 +19,4 @@ This line will make git ignore everything below.
 
 ## SUBMODULE SUPPORT
 
-We don't squash on [submodule](../submodule.md).
+By default, we don't recurse on [submodule](../submodule.md).

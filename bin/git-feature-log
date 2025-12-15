@@ -1,12 +1,12 @@
-#!/bin/bash
-# Delete a feature branch
-
+#!/usr/bin/env bash
+# List the commit until the branching from the default branch (ie main)
 
 set -Eeuo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
 # Bash lib library path detection
 if [ "${BASHLIB_PATH:-}" == "" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
   # This is also a valid path for brew
   BASHLIB_PATH="$SCRIPT_DIR/../lib"
 fi
@@ -27,22 +27,53 @@ function synopsis(){
   cat <<EOF
 Shows the logs of commit in the feature branch (until the common ancestor with the default branch)
 \`\`\`bash
-$(basename "$0")
+$(basename "$0") [options]
 \`\`\`
+
+  Options:
+    * \`-nr\` or \`--no-recurse\` to not recurse in submodule
 EOF
 
 }
 
-# Doc Synopsis
-if [ "${1:-}" = "synopsis" ]; then
-  synopsis
-  exit 0
+RECURSE=true
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -nr | --no-recurse)
+      RECURSE=false
+      ;;
+  esac
+  shift
+done
+
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
+  # script dir is mandatory because we may call the next version
+  # and git-commit in the PATH env var is generally the actual version
+  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when executing $(basename "$0") to a submodule"
+    exit 1
+  fi
+
 fi
 
-# Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
-  doc::help synopsis
-  exit 0
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo "Entering main repo"
 fi
 
 
@@ -70,3 +101,8 @@ pretty_git_logs() {
 }
 pretty_git_logs "$DEFAULT_BRANCH..$BRANCH_NAME"
 echo::success "Done"
+
+if [ $RECURSE == true ]; then
+  # Spacing
+  echo ""
+fi

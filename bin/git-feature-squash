@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # for doc, see markdown file
 
 set -Eeuo pipefail
@@ -32,16 +32,50 @@ EOF
 
 }
 
-# Doc Synopsis
-if [ "${1:-}" = "synopsis" ]; then
-  synopsis
-  exit 0
+RECURSE=false
+COMMIT_MESSAGE="feat: squash feature branch $BRANCH_NAME"
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -r | --recurse)
+      RECURSE=true
+      ;;
+    *)
+      COMMIT_MESSAGE=${1}
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
+  # script dir is mandatory because we may call the next version
+  # and git-commit in the PATH env var is generally the actual version
+  if ! git submodule foreach "$SCRIPT_DIR/git-feature-squash ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when squashing to a submodule"
+    exit 1
+  fi
+
 fi
 
-# Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
-  doc::help synopsis
-  exit 0
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo "Entering main repo"
 fi
 
 BRANCH_NAME=$(git::get_current_branch)
@@ -60,7 +94,6 @@ if git::is_dirty_index; then
 fi
 
 # Message before the reset
-COMMIT_MESSAGE=${1:-"feat: squash feature branch $BRANCH_NAME"}
 echo::info "Commit"
 BODY=$(git log --pretty=format:%s%n%b "$DEFAULT_BRANCH".."$BRANCH_NAME")
 SCISSOR_LINE="# ------------------------ >8 ------------------------"

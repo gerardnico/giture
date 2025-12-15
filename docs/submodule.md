@@ -1,31 +1,50 @@
 # SubModule Support
 
+Commands supports submodule command recursion.
 
-## Recurse on
+## Default behavior
 
-The actual command will also execute themselves on submodules
+They get a default behavior:
 
-* [git-status](commands/git-status.md)
+* [recurse on](#recurse-on) - recurse
+* [recurse off](#recurse-off) - don't recurse
+
+### Recurse on
+
+The following commands will also execute themselves on submodules by default
+
 * [git-commit](commands/git-commit.md)
+* [git-feature-log](commands/git-feature-log.md)
+* [git-log](commands/git-log.md)
+* [git-status](commands/git-status.md)
 
-By default, this command will recurse applying the command to the submodules.
+You can disable this behavior with the `no-recurse` flag. ie
 
-You can disable this behavior with the no-recurse flag: `-nr` or `--no-recurse`
+* `-nr`
+* or `--no-recurse`
 
 Example:
+
 ```bash
-git-amend -nr
+git-log -nr
 ```
 
-## Recurse off
+### Recurse off
 
-These operations will not recurse
+These commands will not recurse by default
 
 * [git-amend](commands/git-amend.md)
+* [git-branch](commands/git-branch.md)
 * [git-feature-merge](commands/git-feature-merge.md)
 * [git-feature-squash](commands/git-feature-squash.md)
-* [git-branch](commands/git-branch.md)
 
-You need to do it first on each submodule, then on the main repo.
+You can recurse by adding the recurse flag. ie:
 
-You can recurse with the recurse flag: `-r` or `--recurse`
+* `-r`
+* or `--recurse`
+
+Example:
+
+```bash
+git-feature-squash -r
+```

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # @name Git Service
 # @brief Execute a command against a Git Hosting Service
 

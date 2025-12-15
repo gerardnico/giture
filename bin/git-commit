@@ -30,11 +30,14 @@ function synopsis() {
 
   cat << EOF
 \`\`\`bash
-$(basename "$0") [--edit|-e] [Optional Commit Message]
+$(basename "$0") [Options] [Optional Commit Message]
 \`\`\`
-* if the commit message is not given, it will be generated with the files in the commit.
-* \`--edit\` or \`-e\`          : edit the message in the editor
-* \`--no-recurse\` or \`-nr\`   : don't commit in the submodule
+  * Args:
+    * if the commit message is not given, it will be generated with the files in the commit.
+
+  * Options:
+    * \`--edit\` or \`-e\`          : edit the message in the editor
+    * \`--no-recurse\` or \`-nr\`   : don't recurse and commit in the submodules
 EOF
 
 }
@@ -80,8 +83,8 @@ if [ $RECURSE == true ] && [ ! -f .git ]; then
 
   # script dir is mandatory because we may call the next version
   # and git-commit in the PATH env var is generally the actual version
-  if ! git submodule foreach "$SCRIPT_DIR/git-commit ${ORIGINAL_ARGS[*]}"; then
-    echo::err "Error when committing to a submodule"
+  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
+    echo::err "Error when executing $(basename "$0") to a submodule"
     exit 1
   fi
 
