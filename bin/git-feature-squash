@@ -33,6 +33,7 @@ EOF
 }
 
 RECURSE=false
+BRANCH_NAME=$(git::get_current_branch) # for the default commit message
 COMMIT_MESSAGE="feat: squash feature branch $BRANCH_NAME"
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
@@ -78,7 +79,6 @@ if [ ! -f .git ]; then
   echo "Entering main repo"
 fi
 
-BRANCH_NAME=$(git::get_current_branch)
 DEFAULT_BRANCH=$(git::get_default_branch)
 if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
   echo::error "It's not a feature branch, it's the default branch ($DEFAULT_BRANCH)"
