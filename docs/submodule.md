@@ -13,6 +13,7 @@ They get a default behavior:
 
 The following commands will also execute themselves on submodules by default
 
+* [git-branch](commands/git-branch.md)
 * [git-commit](commands/git-commit.md)
 * [git-feature-log](commands/git-feature-log.md)
 * [git-log](commands/git-log.md)
@@ -34,7 +35,6 @@ git-log -nr
 These commands will not recurse by default
 
 * [git-amend](commands/git-amend.md)
-* [git-branch](commands/git-branch.md)
 * [git-feature-merge](commands/git-feature-merge.md)
 * [git-feature-squash](commands/git-feature-squash.md)
 

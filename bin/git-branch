@@ -30,38 +30,41 @@ function synopsis() {
   cat << EOF
 List, switch to or create a branch
 \`\`\`bash
-$(basename "$0")  [branch_name]
+$(basename "$0") [options] [branch_name]
 \`\`\`
-* without branch name, the local and remotes branches are listed
-* with a branch name
-  * the branch is created if it does not exist
-  * the work is stashed
-  * the working branch is changed
-  * the optional stashed work is popped
+
+  Options:
+    * \`-nr\` or \`--no-recurse\` to not recurse in submodule
+
+  Args:
+    * without branch name, the local and remotes branches are listed
+    * with a branch name
+      * the branch is created if it does not exist
+      * the work is stashed
+      * the working branch is changed
+      * the optional stashed work is popped
 EOF
 
 }
 
-# Doc Synopsis
-if [ "${1:-}" = "synopsis" ]; then
-  synopsis
-  exit 0
-fi
 
-# Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
-  doc::help synopsis
-  exit 0
-fi
-
-
-RECURSE=false
+RECURSE=true
 BRANCH_NAME=""
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -r | --recurse)
-      RECURSE=true
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -nr | --no-recurse)
+      RECURSE=false
       ;;
     *)
       BRANCH_NAME=${1}

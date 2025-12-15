@@ -24,4 +24,4 @@ ${SYNOPSIS}
 
 ## SUBMODULE
 
-By default, this command will not recurse over [submodule](../submodule.md)
+By default, this command will recurse over [submodule](../submodule.md)
