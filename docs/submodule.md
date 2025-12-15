@@ -6,7 +6,6 @@
 The actual command will also execute themselves on submodules
 
 * [git-status](commands/git-status.md)
-* [git-amend](commands/git-amend.md)
 * [git-commit](commands/git-commit.md)
 
 By default, this command will recurse applying the command to the submodules.
@@ -22,6 +21,7 @@ git-amend -nr
 
 These operations will not recurse
 
+* [git-amend](commands/git-amend.md)
 * [git-feature-merge](commands/git-feature-merge.md)
 * [git-feature-squash](commands/git-feature-squash.md)
 * [git-branch](commands/git-branch.md)

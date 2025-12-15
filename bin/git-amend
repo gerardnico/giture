@@ -30,8 +30,8 @@ $(basename "$0") [-e|--edit] [-nr|--no-recurse] [Commit Message]
 \`\`\`
 If the commit message is not given, it will take the message of the last commit.
 
-* \`--edit\` or \`-e\`          : edit the message in the editor
-* \`--no-recurse\` or \`-nr\`   : don't amend in the submodule
+* \`--edit\` or \`-e\`       : edit the message in the editor
+* \`--recurse\` or \`-r\`    : recurse and amend in the submodules
 EOF
 }
 
@@ -50,15 +50,15 @@ fi
 # Args parsing
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
-RECURSE=true
+RECURSE=false
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -e | --edit)
       MESSAGE_EDIT=true
       ;;
-    -nr | --no-recurse)
-      RECURSE=false
+    -r | --recurse)
+      RECURSE=true
       ;;
     *)
       COMMIT_MESSAGE=${1}
@@ -75,6 +75,11 @@ if [ $RECURSE == true ] && [ ! -f .git ]; then
   # script dir is mandatory because we may call the next version
   # and git-amend in the PATH env var is generally the actual version
   git submodule foreach "$SCRIPT_DIR/git-amend ${ORIGINAL_ARGS[*]}"
+fi
+
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo "Entering main repo"
 fi
 
 if ! git::is_dirty_index && [ "$COMMIT_MESSAGE" == "" ] && [ $MESSAGE_EDIT == false ]; then

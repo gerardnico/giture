@@ -11,10 +11,7 @@ This commands allows you to recreate the last commit
 * or both
 
 It's a [git commit amend](https://git-scm.com/book/id/v2/Git-Tools-Rewriting-History#_git_amend)
-that:
-
-* always work (even if the commit was pushed to the remote)
-* execute also on the [submodules](../submodule.md)
+that always work (even if the commit was pushed to the remote)
 
 ## HOW?
 
@@ -29,6 +26,10 @@ that:
 ## SYNOPSIS
 
 ${SYNOPSIS}
+
+## SUBMODULES
+
+By default, this command does not recurse on [submodules](../submodule.md)
 
 ## See also
 
