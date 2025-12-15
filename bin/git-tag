@@ -2,13 +2,17 @@
 
 set -Eeuo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
 # Bash lib library path detection
 if [ "${BASHLIB_PATH:-}" == "" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
   # This is also a valid path for brew
   BASHLIB_PATH="$SCRIPT_DIR/../lib"
 fi
 export PATH="$BASHLIB_PATH:$PATH"
+
+NC='\033[0m'     # No Color
+RED='\033[0;31m' # Red
 
 # shellcheck source=../..//bash-lib/lib/bashlib-error.sh
 source "bashlib-error.sh"
@@ -19,27 +23,112 @@ source "bashlib-doc.sh"
 function synopsis() {
 
   cat << EOF
-Shows the tags and the hash tag next to each other
+List or create a tag
 
 \`\`\`bash
-$(basename "$0")
+$(basename "$0") [options] [tag_name]
 \`\`\`
+
+  Options:
+    * \`-nr\` or \`--no-recurse\` : do not recurse in submodule
+    * \`-f\` or \`--force\`       : execute git-delete-tag if an existing tag is found
+
+  Args:
+    * without a tag name, the tags are listed
+    * with a tag name, the tag is created
 EOF
 
 }
 
-# Doc Synopsis
-if [ "${1:-}" = "synopsis" ]; then
-  synopsis
-  exit 0
+RECURSE=true
+TAG_NAME=""
+FORCE=false
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -nr | --no-recurse)
+      RECURSE=false
+      ;;
+    -f | --force)
+      FORCE=true
+      ;;
+    *)
+      TAG_NAME=${1}
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
+  # script dir is mandatory because we may call the next version
+  # and the git-xxxx command in the PATH env var is generally the actual version
+  CMD="$SCRIPT_DIR/$(basename "$0")"
+  # Quote the arguments otherwise you get space in message
+  for ORIGINAL_ARG in "${ORIGINAL_ARGS[@]}"; do
+    CMD+=" \"$ORIGINAL_ARG\""
+  done
+  if ! git submodule foreach "$CMD"; then
+    echo::err "Error when executing $(basename "$0") to a submodule. Command: $CMD"
+    exit 1
+  fi
+
 fi
 
-# Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
-  doc::help synopsis
-  exit 0
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo ""
+  echo "Entering main repo"
 fi
 
-# Shows the tags and the hash tag next to each other
-# shellcheck disable=SC2016
-git tag -l | xargs -I {} sh -c 'echo "{} $(git rev-parse --short {})"'
+if [ "$TAG_NAME" == "" ]; then
+
+  # Shows the tags and the hash tag next to each other
+  # shellcheck disable=SC2016
+  git tag -l | xargs -I {} sh -c 'echo "{} $(git rev-parse --short {})"'
+  exit
+
+fi
+
+# Delete the tag if it exists (both locally and remotely)
+LOCAL_TAG_FOUND=false
+if git tag -l | grep -q "^${TAG_NAME}$"; then
+  LOCAL_TAG_FOUND=true
+  echo "Local tag found"
+fi
+# Check if tag exists on remote and delete it
+REMOTE_TAG_FOUND=false
+if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
+  REMOTE_TAG_FOUND=true
+  echo "Remote tag found"
+fi
+# Deleting?
+if [ $LOCAL_TAG_FOUND == true ] || [ $REMOTE_TAG_FOUND == true ]; then
+  if [ $FORCE == false ]; then
+    echo -e "${RED}Actual tag found and not deleted because of a no force run. Exiting${NC}"
+    exit 1
+  fi
+  echo "Force run deleting existing tag: $TAG_NAME"
+  git-tag-delete "$TAG_NAME"
+fi
+
+echo "Creating Tag $1"
+git tag "$1"
+echo "Pushing Tag $1"
+git push origin tag "$1"
+echo "Tagging done"

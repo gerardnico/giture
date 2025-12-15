@@ -82,9 +82,14 @@ done
 if [ $RECURSE == true ] && [ ! -f .git ]; then
 
   # script dir is mandatory because we may call the next version
-  # and git-commit in the PATH env var is generally the actual version
-  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
-    echo::err "Error when executing $(basename "$0") to a submodule"
+  # and the git-xxxx command in the PATH env var is generally the actual version
+  CMD="$SCRIPT_DIR/$(basename "$0")"
+  # Quote the arguments otherwise you get space in message
+  for ORIGINAL_ARG in "${ORIGINAL_ARGS[@]}"; do
+    CMD+=" \"$ORIGINAL_ARG\""
+  done
+  if ! git submodule foreach "$CMD"; then
+    echo::err "Error when executing $(basename "$0") to a submodule. Command: $CMD"
     exit 1
   fi
 

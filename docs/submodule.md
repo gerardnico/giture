@@ -18,6 +18,7 @@ The following commands will also execute themselves on submodules by default
 * [git-feature-log](commands/git-feature-log.md)
 * [git-log](commands/git-log.md)
 * [git-status](commands/git-status.md)
+* [git-tag](commands/git-tag.md)
 
 You can disable this behavior with the `no-recurse` flag. ie
 

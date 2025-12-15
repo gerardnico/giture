@@ -22,9 +22,9 @@ source "bashlib-command.sh"
 # shellcheck source=../..//bash-lib/lib/bashlib-git.sh
 source "bashlib-git.sh"
 
-function synopsis(){
+function synopsis() {
 
-  cat <<EOF
+  cat << EOF
 Shows the logs of commit in the feature branch (until the common ancestor with the default branch)
 \`\`\`bash
 $(basename "$0") [options]
@@ -63,9 +63,14 @@ done
 if [ $RECURSE == true ] && [ ! -f .git ]; then
 
   # script dir is mandatory because we may call the next version
-  # and git-commit in the PATH env var is generally the actual version
-  if ! git submodule foreach "$SCRIPT_DIR/$(basename "$0") ${ORIGINAL_ARGS[*]}"; then
-    echo::err "Error when executing $(basename "$0") to a submodule"
+  # and the git-xxxx command in the PATH env var is generally the actual version
+  CMD="$SCRIPT_DIR/$(basename "$0")"
+  # Quote the arguments otherwise you get space in message
+  for ORIGINAL_ARG in "${ORIGINAL_ARGS[@]}"; do
+    CMD+=" \"$ORIGINAL_ARG\""
+  done
+  if ! git submodule foreach "$CMD"; then
+    echo::err "Error when executing $(basename "$0") to a submodule. Command: $CMD"
     exit 1
   fi
 
@@ -75,8 +80,6 @@ fi
 if [ ! -f .git ]; then
   echo "Entering main repo"
 fi
-
-
 
 BRANCH_NAME=$(git::get_current_branch)
 DEFAULT_BRANCH=$(git::get_default_branch)
@@ -95,9 +98,9 @@ FORMAT="$HASH $RELATIVE_TIME{$AUTHOR{$REFS $SUBJECT"
 
 pretty_git_logs() {
   # in git log, branch name value could be also HEAD as we are on the branch
-  git log --graph --pretty="tformat:$FORMAT" "$@" |
-  column -t -s '{' |
-  less -XRS --quit-if-one-screen
+  git log --graph --pretty="tformat:$FORMAT" "$@" \
+    | column -t -s '{' \
+    | less -XRS --quit-if-one-screen
 }
 pretty_git_logs "$DEFAULT_BRANCH..$BRANCH_NAME"
 echo::success "Done"
