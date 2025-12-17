@@ -57,6 +57,7 @@ function github() {
   echo ""
   echo "GitHub Actions Run:"
   gh run list
+  echo "Watch with: gh run watch"
   echo ""
   echo "Git Releases:"
   gh release list
