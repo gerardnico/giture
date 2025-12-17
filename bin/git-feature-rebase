@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# Rebase a feature branch from main
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd)"
+
+# Bash lib library path detection
+if [ "${BASHLIB_PATH:-}" == "" ]; then
+  # This is also a valid path for brew
+  BASHLIB_PATH="$SCRIPT_DIR/../lib"
+fi
+export PATH="$BASHLIB_PATH:$PATH"
+
+# shellcheck source=../..//bash-lib/lib/bashlib-error.sh
+source "bashlib-error.sh"
+error::set_trap
+# shellcheck source=../..//bash-lib/lib/bashlib-doc.sh
+source "bashlib-doc.sh"
+# shellcheck source=../..//bash-lib/lib/bashlib-string.sh
+source "bashlib-command.sh"
+# shellcheck source=../..//bash-lib/lib/bashlib-git.sh
+source "bashlib-git.sh"
+
+function synopsis() {
+
+  cat << EOF
+Integrate commit from main into the feature branch
+
+\`\`\`bash
+$(basename "$0") [options] [commit message]
+\`\`\`
+
+  Options:
+    * \`--recurse\` or \`-r\`    : recurse in the submodules
+
+EOF
+
+}
+
+BRANCH_NAME=$(git::get_current_branch)
+RECURSE=false
+ORIGINAL_ARGS=("$@")
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help | help)
+      # Help
+      doc::help synopsis
+      exit 0
+      ;;
+    synopsis)
+      # Doc Synopsis
+      synopsis
+      exit 0
+      ;;
+    -r | --recurse)
+      RECURSE=true
+      ;;
+  esac
+  shift
+done
+
+# First submodules
+# If not in a submodule (in a submodule .git is a file)
+# Otherwise the commit is only for the submodule
+if [ $RECURSE == true ] && [ ! -f .git ]; then
+
+  # script dir is mandatory because we may call the next version
+  # and the git-xxxx command in the PATH env var is generally the actual version
+  CMD="$SCRIPT_DIR/$(basename "$0")"
+  # Quote the arguments otherwise you get space in message
+  for ORIGINAL_ARG in "${ORIGINAL_ARGS[@]}"; do
+    CMD+=" \"$ORIGINAL_ARG\""
+  done
+  if ! git submodule foreach "$CMD"; then
+    echo::err "Error when executing $(basename "$0") to a submodule. Command: $CMD"
+    exit 1
+  fi
+
+fi
+
+# Status of the actual repo
+if [ ! -f .git ]; then
+  echo "Entering main repo"
+fi
+
+DEFAULT_BRANCH=$(git::get_default_branch)
+if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
+  echo::error "It's not a feature branch, it's the default branch ($DEFAULT_BRANCH)"
+  echo::error "You can't rebase the default branch"
+  exit 1
+fi
+
+command::echo_eval "git rebase $DEFAULT_BRANCH"
+# Commits in the feature branch not in main are recreated on top of the main commits
+command::echo_eval "git push --force-with-lease"
+echo::success "Done"

@@ -37,6 +37,7 @@ These commands will not recurse by default
 
 * [git-amend](commands/git-amend.md)
 * [git-feature-merge](commands/git-feature-merge.md)
+* [git-feature-rebase](commands/git-feature-rebase.md)
 * [git-feature-squash](commands/git-feature-squash.md)
 
 You can recurse by adding the recurse flag. ie:
