@@ -1,11 +1,15 @@
 % git-feature-log(1) Version ${VERSION} | git-feature-log
+
 # NAME
 
-Shows all commits performed on this branch since it was created.
+Shows a difference of commits between:
+
+* the default branch (main)
+* and the current branch.
 
 ## HOW
 
-It shows all commit until the common ancestor commit with the default branch
+It shows all commits until the common ancestor commit with the default branch.
 
 ## SYNOPSIS
 

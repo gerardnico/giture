@@ -25,7 +25,9 @@ source "bashlib-git.sh"
 function synopsis() {
 
   cat << EOF
-Shows the logs of commit in the feature branch (until the common ancestor with the default branch)
+Shows the difference in commits of the actual feature branch with the default branch.
+(until the common ancestor)
+
 \`\`\`bash
 $(basename "$0") [options]
 \`\`\`
@@ -88,7 +90,7 @@ if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
   exit 1
 fi
 
-echo::info "Logs:"
+
 HASH="%C(always,yellow)%h%C(always,reset)"
 RELATIVE_TIME="%C(always,green)%ar%C(always,reset)"
 AUTHOR="%C(always,bold blue)%an%C(always,reset)"
@@ -102,7 +104,14 @@ pretty_git_logs() {
     | column -t -s '{' \
     | less -XRS --quit-if-one-screen
 }
+
+echo::info "Commits in $BRANCH_NAME, not in $DEFAULT_BRANCH:"
 pretty_git_logs "$DEFAULT_BRANCH..$BRANCH_NAME"
+
+echo::info ""
+echo::info "Commits in $DEFAULT_BRANCH not in $BRANCH_NAME:"
+pretty_git_logs "$BRANCH_NAME..$DEFAULT_BRANCH"
+echo::info
 echo::success "Done"
 
 if [ $RECURSE == true ]; then
