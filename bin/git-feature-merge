@@ -58,9 +58,9 @@ while [[ $# -gt 0 ]]; do
       RECURSE=true
       ;;
     *)
-      COMMIT_MESSAGE=${1}
-      shift
-      break
+      doc::help synopsis
+      echo::err "The argument ($1) was unexpected"
+      exit 1
       ;;
   esac
   shift
@@ -92,9 +92,13 @@ fi
 
 DEFAULT_BRANCH=$(git::get_default_branch)
 if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
-  echo::error "It's not a feature branch, it's the default branch ($DEFAULT_BRANCH)"
-  echo::error "You can't merge the default branch"
-  exit 1
+  echo::warn "It's not a feature branch, it's the default branch ($DEFAULT_BRANCH)"
+  echo::warn "No commits merged"
+  if [ $RECURSE == true ]; then
+    # Spacing
+    echo ""
+  fi
+  exit 0
 fi
 
 echo::info "Check if branch $BRANCH_NAME is dirty"
@@ -112,6 +116,12 @@ command::echo_eval "git checkout $DEFAULT_BRANCH"
 #command::echo_eval "git pull origin $DEFAULT_BRANCH"
 
 COMMIT_COUNT=$(git rev-list --count "$DEFAULT_BRANCH".."$BRANCH_NAME")
+
+if [ "$COMMIT_COUNT" == "0" ]; then
+  echo::success "No commits to merge into $DEFAULT_BRANCH"
+  exit
+fi
+
 if [ "$COMMIT_COUNT" == "1" ]; then
   # Only one commit to merge
   command::echo_eval "git merge $BRANCH_NAME"

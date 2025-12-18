@@ -2,28 +2,20 @@
 
 # NAME
 
-Merge squash all commits of the current branch into the default branch
+Merge 1 commit of the current feature branch into the default branch
 
 ## HOW IT WORKS
 
-This command will merge all commits of the current branch into one commit on the default branch
-(ie `main`)
+This command will:
 
-You can see all commit with the [git-feature-log command](git-feature-log.md).
+* merge:
+  * 1 commit of the current branch
+  * into 1 commit on the default branch (ie `main`)
+* push the commit to the origin
+* switch the branch to the default branch
 
-## COMMIT MESSAGE HANDLING
-
-You can give the subject as parameter.
-
-The body of the commit message is created automatically.
-It's created via concatenation if all subjects and body of commits message
-of the working branch.
-
-At the end, the editor is open to give you the possibility to change it.
-(tip: `ZZ` to save and close VIM).
-
-We had a scissor line at the end of the commit message.
-This line will make git ignore everything below.
+If you have more than 1 commit in your feature branch, you need to squash them before merging
+with the [git-feature-squash](git-feature-squash.md) command.
 
 ## SYNOPSIS
 
