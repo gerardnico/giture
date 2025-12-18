@@ -107,12 +107,15 @@ fi
 
 # Nothing to commit but push
 DIRTY_INDEX=false
-if git::is_dirty_index; then
+# https://stackoverflow.com/a/5737794/297420
+PORCELAIN_STATUS=$(git status --porcelain)
+if [[ -n $PORCELAIN_STATUS ]]; then
+  echo::info "Index is dirty"
   DIRTY_INDEX=true
 fi
 if [ $DIRTY_INDEX == true ]; then
-  echo::info "Index is dirty, saving in stash"
-  git stash
+  echo::info "Creating a stash"
+  git stash push -u -m "auto-stash before switching to $BRANCH_NAME"
 fi
 
 if ! git::branch_exists "$BRANCH_NAME"; then
