@@ -102,9 +102,17 @@ if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
 fi
 
 echo::info "Check if branch $BRANCH_NAME is dirty"
-command::echo_eval "git checkout $BRANCH_NAME"
-if git::is_dirty_index; then
+# Hack because with submodules, the repo may be dirty even if there is nothing to stash
+# git stash is always successfully even if there is nothing to stash
+STASH_COUNT=$(
+  git stash > /dev/null
+  git stash list | wc -l
+)
+if [[ "$STASH_COUNT" != "0" ]]; then
+  git stash pop > /dev/null
   echo::err "The branch is dirty, commit, stash or rollback your changes"
+  echo::err "Changes:"
+  echo::err "$(git status --porcelain)"
   exit 1
 fi
 
