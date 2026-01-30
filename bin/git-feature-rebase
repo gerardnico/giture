@@ -60,6 +60,12 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+DEFAULT_BRANCH=$(git::get_default_branch)
+if [ "$CURRENT_BRANCH" = "$DEFAULT_BRANCH" ]; then
+  echo::error "You are on the default branch ($DEFAULT_BRANCH). Checkout your feature branch first."
+  exit 1
+fi
+
 # First submodules
 # If not in a submodule (in a submodule .git is a file)
 # Otherwise the commit is only for the submodule

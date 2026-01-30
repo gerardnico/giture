@@ -86,8 +86,8 @@ fi
 BRANCH_NAME=$(git::get_current_branch)
 DEFAULT_BRANCH=$(git::get_default_branch)
 if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
-  echo::err "Nothing to show, it's the default branch ($DEFAULT_BRANCH)"
-  exit 1
+  echo::warning "Nothing to show, it's the default branch ($DEFAULT_BRANCH)"
+  exit
 fi
 
 

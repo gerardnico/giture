@@ -78,6 +78,14 @@ git-feature-log
 gfl
 ```
 
+* Integrate the commits from the main branch
+
+```bash
+git-feature-rebase
+# with alias
+gfr
+```
+
 * Squash all commits on the feature branch to one (before merge if wanted)
 
 ```bash
@@ -129,6 +137,7 @@ alias ga='git-amend'
 | `gfd`           | [git-feature-delete](commands/git-feature-delete.md) | Delete a feature branch                                                           |
 | `gfl`           | [git-feature-log](commands/git-feature-log.md)       | Shows the commits of the feature branch since the branching                       |
 | `gfm`           | [git-feature-merge](commands/git-feature-merge.md)   | Merge a feature branch to the default branch                                      |
+| `gfr`           | [git-feature-rebase](commands/git-feature-rebase.md) | Rebase a feature branch from the default branch                                   |
 | `gfs`           | [git-feature-squash](commands/git-feature-squash.md) | Squash all commits of a feature branch                                            |
 | `gl`            | [git-log](commands/git-log.md)                       | Shows the last commit                                                             |
 | `gll`           | [git-log-all](commands/git-log-all.md)               | Shows all commits                                                                 |

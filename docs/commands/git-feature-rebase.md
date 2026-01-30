@@ -2,7 +2,7 @@
 
 # NAME
 
-Rebase commits from main into the feature branch
+Rebase commits from the default branch (generally) main into the feature branch
 
 
 ## SYNOPSIS
