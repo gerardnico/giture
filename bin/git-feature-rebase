@@ -38,7 +38,7 @@ EOF
 
 }
 
-BRANCH_NAME=$(git::get_current_branch)
+CURRENT_BRANCH=$(git::get_current_branch)
 RECURSE=false
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
@@ -91,7 +91,7 @@ if [ ! -f .git ]; then
 fi
 
 DEFAULT_BRANCH=$(git::get_default_branch)
-if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
+if [[ "$CURRENT_BRANCH" == "$DEFAULT_BRANCH" ]]; then
   echo::error "It's not a feature branch, it's the default branch ($DEFAULT_BRANCH)"
   echo::error "You can't rebase the default branch"
   exit 1
