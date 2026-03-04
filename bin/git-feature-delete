@@ -41,7 +41,7 @@ if [ "${1:-}" = "synopsis" ]; then
 fi
 
 # Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
+if [[ "${1:-}" =~ ^-h$|^--help$|^help$ ]]; then
   doc::help synopsis
   exit 0
 fi

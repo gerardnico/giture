@@ -115,7 +115,7 @@ if [ "${1:-}" == "synopsis" ]; then
   exit
 fi
 
-if [[ "${1:-}" =~ -h|--help|help ]]; then
+if [[ "${1:-}" =~ ^-h$|^--help$|^help$ ]]; then
   doc::help synopsis
   exit
 fi
