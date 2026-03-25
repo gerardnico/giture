@@ -38,6 +38,7 @@ $(basename "$0") [Options] [Optional Commit Message]
   * Options:
     * \`--edit\` or \`-e\`          : edit the message in the editor
     * \`--no-recurse\` or \`-nr\`   : don't recurse and commit in the submodules
+    * \`--no-verify\` or \`-nv\`    : disable hooks validation
 EOF
 
 }
@@ -58,6 +59,7 @@ fi
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
 RECURSE=true
+NO_VERIFY=false
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -66,6 +68,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     -nr | --no-recurse)
       RECURSE=false
+      ;;
+    -nv | --no-verify)
+      NO_VERIFY=true
       ;;
     *)
       COMMIT_MESSAGE=${1}
@@ -171,6 +176,10 @@ COMMIT_ARGS=(commit -v -m "$COMMIT_MESSAGE")
 if [ $MESSAGE_EDIT == true ]; then
   COMMIT_ARGS+=(--edit)
 fi
+if [ $NO_VERIFY == true ]; then
+  COMMIT_ARGS+=(--no-verify)
+fi
+
 git "${COMMIT_ARGS[@]}"
 
 # Spacing in case of submodule execution
