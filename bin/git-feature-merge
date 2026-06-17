@@ -101,6 +101,14 @@ if [[ "$BRANCH_NAME" == "$DEFAULT_BRANCH" ]]; then
   exit 0
 fi
 
+echo::info "Check if the stash stack is empty"
+# mandatory otherwise the below dirty check do a stash pop
+STASH_COUNT=$(git stash list | wc -l)
+if [[ "$STASH_COUNT" != "0" ]]; then
+  echo::err "The stash stack is not empty"
+  exit 1
+fi
+
 echo::info "Check if branch $BRANCH_NAME is dirty"
 # Hack because with submodules, the repo may be dirty even if there is nothing to stash
 # git stash is always successfully even if there is nothing to stash
@@ -109,8 +117,8 @@ STASH_COUNT=$(
   git stash list | wc -l
 )
 if [[ "$STASH_COUNT" != "0" ]]; then
-  git stash pop > /dev/null
   echo::err "The branch is dirty, commit, stash or rollback your changes"
+  git stash pop > /dev/null
   echo::err "Changes:"
   echo::err "$(git status --porcelain)"
   exit 1

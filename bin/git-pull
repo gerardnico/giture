@@ -27,7 +27,7 @@ source "bashlib-doc.sh"
 function synopsis() {
 
   cat << EOF
-Easy AutoPull
+Easy AutoPull with fetch tag force
 \`\`\`bash
 $(basename "$0")
 \`\`\`
@@ -42,7 +42,7 @@ if [ "${1:-}" = "synopsis" ]; then
 fi
 
 # Help
-if [[ "${1:-}" =~ -h|--help|help ]]; then
+if [[ "${1:-}" =~ ^-h$|^--help$|^help$ ]]; then
   doc::help synopsis
   exit 0
 fi
@@ -68,6 +68,14 @@ if [ "$STASH" = "1" ]; then
   git stash
 fi
 
+
+echo::info "$DIRECTORY_NAME - Fetch tags with force"
+# To avoid
+# From github.com:gerardnico/gerardnico.com
+#   2e74272..af74610  next         -> origin/next
+# ! [rejected]        early-access -> early-access  (would clobber existing tag)
+
+git fetch --tags --force
 echo::info "$DIRECTORY_NAME - Pulling"
 git pull
 

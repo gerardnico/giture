@@ -4,7 +4,9 @@
 ## DESCRIPTION
 
 Integrate the changes from an upstream branch
-(ie stash if needed and pull)
+* ie stash if needed
+* fetch and force tags
+* then pull
 
 ie [pull auto-stash](#note-on-rebase-autostash) but with all `pull` type.
 
