@@ -41,6 +41,12 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+# Check docker
+if ! docker info &> /dev/null; then
+    echo "Docker is unavailable"
+    exit 1
+fi
+
 # Get the next version
 export GIT_CLIFF__BUMP__INITIAL_TAG=v0.1.0 # by default it's 0.1.0
 next_version=$(git cliff --unreleased --bump "$BUMP_TYPE" --context --tag-pattern "v[0-9]+\\.[0-9]+\\.[0-9]+" | jq -r '.[0].version' | tr -d "v")
