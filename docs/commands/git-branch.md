@@ -16,6 +16,7 @@ A branch checkout that will always work
   * create the branch if it does not exist
   * checkout the branch
   * un-stash
+  * control the stash and output an error if the stash is not empty
 
 
 ## SYNOPSIS

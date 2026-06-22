@@ -115,7 +115,7 @@ if [[ -n $PORCELAIN_STATUS ]]; then
 fi
 if [ $DIRTY_INDEX == true ]; then
   echo::info "Creating a stash"
-  git stash push -u -m "auto-stash before switching to $BRANCH_NAME"
+  git stash push -u -m "Stash created by git-branch before switching to $BRANCH_NAME"
 fi
 
 if ! git::branch_exists "$BRANCH_NAME"; then
@@ -125,10 +125,23 @@ fi
 
 echo::info "Switching to the branch $BRANCH_NAME"
 git checkout "$BRANCH_NAME"
-
-if [ $DIRTY_INDEX == true ]; then
-  echo::info "Index was dirty, popping the stash"
-  git stash pop
-fi
-
 echo::success "Switched to the branch $BRANCH_NAME"
+
+RED_START="\033[31m"
+ANSI_END="\033[0m"
+index=0
+while git stash list | grep -q '.'; do
+  ((index++))
+  if [ $DIRTY_INDEX != true ]; then
+    echo -e "${RED_START}Error: Index was not dirty and the stash is not empty${ANSI_END}"
+    exit 1
+  fi
+  echo "Popping stash - $index"
+  if (( index > 1 )); then
+    echo -e "${RED_START}Error/Remember/Warning: Your stash stack is not empty${ANSI_END}"
+    exit 1
+  fi
+  git stash pop || break
+done
+
+echo::success "Stash and switch to the branch $BRANCH_NAME successful"
