@@ -51,6 +51,7 @@ fi
 COMMIT_MESSAGE=""
 MESSAGE_EDIT=false
 RECURSE=false
+NO_VERIFY=false
 ORIGINAL_ARGS=("$@")
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -59,6 +60,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     -r | --recurse)
       RECURSE=true
+      ;;
+    -nv | --no-verify)
+      NO_VERIFY=true
       ;;
     *)
       COMMIT_MESSAGE=${1}
@@ -122,7 +126,9 @@ fi
 # there was only one undo
 # By checking the file first, git-backup will not fail
 # knowing that it will not delete another commit
-command::echo_eval "git-prepare"
+if [ ! $NO_VERIFY ]; then
+  command::echo_eval "git-prepare"
+fi
 # delete the last commit
 command::echo_eval "git-undo"
 # commit after / no verify to disable git-hooks has we have done it earlier with git-prepare
